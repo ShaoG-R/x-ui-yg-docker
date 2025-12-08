@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  x-ui-yg:
+    build: .
+    image: x-ui-yg:alpine-slim
+    container_name: x-ui-yg
+    restart: unless-stopped
+    # 启用 TTY 使得日志输出更友善
+    tty: true
+    environment:
+      - TZ=Asia/Shanghai
+      # --- 首次运行配置 ---
+      # 留空则随机生成 (建议首次运行查看日志获取，更安全)
+      # 填写则固定为指定值
+      - XUI_USER=
+      - XUI_PASS=
+      - XUI_PORT=54321
+      # - RESET_CONFIG=true # 取消注释以强制重置账号密码
+    volumes:
+      # 映射整个目录，脚本会自动处理二进制文件的更新
+      - ./data:/usr/local/x-ui
+      # 如果你需要 SSL 证书，建议单独挂载证书目录到容器内
+      - ./cert:/root/cert
+    ports:
+      # 面板端口
+      - "54321:54321"
+      # 节点端口范围 (根据需要调整)
+      - "10000-10005:10000-10005"
+      - "10000-10005:10000-10005/udp"
+    # 资源限制 (可选，防止被滥用导致宿主机卡死)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    network_mode: bridge
