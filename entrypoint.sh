@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # 定义路径
 DIST_DIR="/usr/local/x-ui-dist"

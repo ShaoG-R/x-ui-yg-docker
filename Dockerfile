@@ -29,6 +29,7 @@ ENV TZ=Asia/Shanghai \
 
 # 仅安装 sh 环境下最基础的依赖
 RUN apk add --no-cache \
+    bash \
     libc6-compat \
     ca-certificates \
     tzdata \
