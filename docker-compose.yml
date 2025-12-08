@@ -16,6 +16,7 @@ services:
       - XUI_USER=
       - XUI_PASS=
       - XUI_PORT=54321
+      - VERBOSE=false # 设置为 true 以在日志显示设置的环境变量值
       # - RESET_CONFIG=true # 取消注释以强制重置账号密码
     volumes:
       # 映射整个目录，脚本会自动处理二进制文件的更新
