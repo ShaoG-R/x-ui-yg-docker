@@ -16,7 +16,7 @@
 ### 方式一：使用已发布的镜像 (推荐)
 
 我们通过 GitHub Container Registry 发布构建好的镜像。
-镜像地址: `ghcr.io/shaog-r/x-ui-yg-docker:alpine` (或者 `latest`)
+镜像地址: `ShaoGme/x-ui-yg:alpine` (或者 `latest`)
 
 #### 1. 简单运行 (Docker CLI)
 
@@ -28,7 +28,7 @@ docker run -d \
     -e XUI_USER=myuser \
     -e XUI_PASS=mypassword \
     -e XUI_PORT=54321 \
-    ghcr.io/shaog-r/x-ui-yg-docker:alpine
+    ShaoGme/x-ui-yg:alpine
 ```
 
 #### 2. 使用 Docker Compose
@@ -40,7 +40,7 @@ version: '3.8'
 services:
   x-ui-yg:
     # 使用发布的镜像
-    image: ghcr.io/shaog-r/x-ui-yg-docker:alpine
+    image: ShaoGme/x-ui-yg:alpine
     container_name: x-ui-yg
     restart: unless-stopped
     tty: true
@@ -80,7 +80,7 @@ docker run -d \
     -v $(pwd)/data:/usr/local/x-ui \
     -e XUI_USER=myuser \
     -e XUI_PASS=mypassword \
-    -e XUI_PORT=54321 \
+    -e XUI_PORT=54321 \ # 添加 -e XUI_PATH=/ 以确定web路径
     x-ui-yg:alpine
 ```
 
