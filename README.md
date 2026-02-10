@@ -53,6 +53,7 @@ services:
       - "10000-10005:10000-10005/udp"
     volumes:
       - ./data:/usr/local/x-ui
+      #  - ./your_ssl_certs:/root/ygkkkca/ #  你的ssl 证书存放目录映射到/root/ygkkkca/，因为默认ssl目录位置在/root/ygkkkca/
     environment:
       - XUI_USER=myuser
       - XUI_PASS=mypassword

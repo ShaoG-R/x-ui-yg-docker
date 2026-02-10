@@ -22,8 +22,7 @@ services:
     volumes:
       # 映射整个目录，脚本会自动处理二进制文件的更新
       - ./data:/usr/local/x-ui
-      # 如果你需要 SSL 证书，建议单独挂载证书目录到容器内
-      - ./cert:/root/cert
+      #  - ./your_ssl_certs:/root/ygkkkca/ #  你的ssl 证书存放目录映射到/root/ygkkkca/，因为默认ssl目录位置在/root/ygkkkca/
     ports:
       # 面板端口
       - "54321:54321"
