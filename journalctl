@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# 定义日志路径 (硬编码或从环境变量获取)
+LOG_FILE="/usr/local/x-ui/init.log"
+MAX_LOG_SIZE=51200
+
+# 确保日志文件存在
+if [ ! -f "$LOG_FILE" ]; then
+    touch "$LOG_FILE"
+fi
+
+# 检查是否需要滚动
+if [ -f "$LOG_FILE" ]; then
+    # 获取文件大小 (兼容 Alpine stat)
+    SIZE=$(stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
+    
+    if [ "$SIZE" -gt "$MAX_LOG_SIZE" ]; then
+        mv -f "$LOG_FILE" "${LOG_FILE}.old"
+        touch "$LOG_FILE"
+        echo "$(date "+%Y-%m-%d %H:%M:%S") [Info] Log file exceeded ${MAX_LOG_SIZE} bytes. Rotated." >> "$LOG_FILE"
+    fi
+fi
+
+# 将标准输入追加到日志文件
+# 如果有输入流，则读取并写入
+if [ -p /dev/stdin ] || [ ! -t 0 ]; then
+    cat >> "$LOG_FILE"
+fi

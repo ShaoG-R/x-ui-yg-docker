@@ -3,7 +3,6 @@ version: '3.8'
 services:
   x-ui-yg:
     build: .
-    image: x-ui-yg:alpine-slim
     container_name: x-ui-yg
     restart: unless-stopped
     # 启用 TTY 使得日志输出更友善

@@ -5,45 +5,23 @@ DIST_DIR="/usr/local/x-ui-dist"
 WORK_DIR="/usr/local/x-ui"
 LOG_FILE="${WORK_DIR}/init.log"
 
-# 定义日志滚动阈值 (字节)
-# 50KB = 51200 bytes
-# 既能保留最近几次的重启记录，又能防止敏感信息永久驻留
-MAX_LOG_SIZE=51200
-
-# 确保日志文件存在，避免报错
+# 确保日志文件存在 (journalctl 会处理，但此处保留以防万一)
 touch "$LOG_FILE"
 
-# --- 日志滚动函数 ---
-rotate_log() {
-    if [ -f "$LOG_FILE" ]; then
-        # 获取文件大小 (Alpine/BusyBox stat 语法)
-        SIZE=$(stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
-        
-        if [ "$SIZE" -gt "$MAX_LOG_SIZE" ]; then
-            # 滚动日志: init.log -> init.log.old
-            mv -f "$LOG_FILE" "${LOG_FILE}.old"
-            touch "$LOG_FILE"
-            
-            # 在新日志开头记录滚动事件
-            echo "$(date "+%Y-%m-%d %H:%M:%S") [Info] Log file exceeded ${MAX_LOG_SIZE} bytes. Rotated." >> "$LOG_FILE"
-        fi
-    fi
-}
-
-# 脚本启动时立即执行检查
-rotate_log
+# 脚本启动时立即执行检查 (通过调用 journalctl 空写或 simple echo)
+echo "" | journalctl
 
 # 定义日志辅助函数
 log() {
-    echo "$(date "+%Y-%m-%d %H:%M:%S") [Info] $1" >> "$LOG_FILE"
+    echo "$(date "+%Y-%m-%d %H:%M:%S") [Info] $1" | journalctl
 }
 
 warn() {
-    echo "$(date "+%Y-%m-%d %H:%M:%S") [Warn] $1" >> "$LOG_FILE"
+    echo "$(date "+%Y-%m-%d %H:%M:%S") [Warn] $1" | journalctl
 }
 
 # 记录本次启动分割线
-echo "------------------------------------------------" >> "$LOG_FILE"
+echo "------------------------------------------------" | journalctl
 log "Container entrypoint started."
 
 # ------------------------------------------------
@@ -148,21 +126,23 @@ if [ ! -f "$DB_FILE" ] || [ "${RESET_CONFIG}" = "true" ]; then
     fi
 
     # 将敏感信息写入日志（如果日志后续发生滚动，这些信息最终会被清理）
-    echo "---------------------------------------------" >> "$LOG_FILE"
-    echo "x-ui Initial Login Info:" >> "$LOG_FILE"
-    echo "  Username: ${DISPLAY_USER}" >> "$LOG_FILE"
-    echo "  Password: ${DISPLAY_PASS}" >> "$LOG_FILE"
-    echo "  Port    : ${DISPLAY_PORT}" >> "$LOG_FILE"
-    echo "  WebPath : ${DISPLAY_PATH}" >> "$LOG_FILE"
-    echo "---------------------------------------------" >> "$LOG_FILE"
+    {
+        echo "---------------------------------------------"
+        echo "x-ui Initial Login Info:"
+        echo "  Username: ${DISPLAY_USER}"
+        echo "  Password: ${DISPLAY_PASS}"
+        echo "  Port    : ${DISPLAY_PORT}"
+        echo "  WebPath : ${DISPLAY_PATH}"
+        echo "---------------------------------------------"
+    } | journalctl
 
     # 使用 DIST_DIR 下的二进制文件进行初始化设置
-    ${DIST_DIR}/x-ui setting -username "${RUN_USER}" -password "${RUN_PASS}" >> "$LOG_FILE" 2>&1
-    ${DIST_DIR}/x-ui setting -port "${RUN_PORT}" >> "$LOG_FILE" 2>&1
+    ${DIST_DIR}/x-ui setting -username "${RUN_USER}" -password "${RUN_PASS}" 2>&1 | journalctl
+    ${DIST_DIR}/x-ui setting -port "${RUN_PORT}" 2>&1 | journalctl
     
     if [ "${RUN_PATH}" != "/" ]; then
         CLEAN_PATH="/$(echo "${RUN_PATH}" | sed 's|^/||')"
-        ${DIST_DIR}/x-ui setting -webBasePath "${CLEAN_PATH}" >> "$LOG_FILE" 2>&1
+        ${DIST_DIR}/x-ui setting -webBasePath "${CLEAN_PATH}" 2>&1 | journalctl
     fi
     
     log "Configuration initialized."

@@ -40,10 +40,12 @@ WORKDIR ${XUI_HOME}
 
 COPY --from=builder /app_dist ${XUI_BIN_DIR}
 COPY entrypoint.sh /usr/bin/entrypoint.sh
+COPY journalctl /usr/bin/journalctl
 
 # 修复换行符并授权
 RUN sed -i 's/\r$//' /usr/bin/entrypoint.sh \
-    && chmod +x /usr/bin/entrypoint.sh
+    && sed -i 's/\r$//' /usr/bin/journalctl \
+    && chmod +x /usr/bin/entrypoint.sh /usr/bin/journalctl
 
 EXPOSE 54321 10000-10010/tcp 10000-10010/udp
 
